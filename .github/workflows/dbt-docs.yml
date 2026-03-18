@@ -1,4 +1,4 @@
-name: Deploy dbt docs to GitHub Pages
+name: Build and deploy dbt project
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -27,7 +27,7 @@ jobs:
       - name: Install dbt-duckdb
         run: pip install dbt-duckdb==1.9.2
 
-      - name: Generate dbt docs
+      - name: Build dbt project
         run: |
           cat > profiles.yml <<'PROFILES'
           example_data:
@@ -38,14 +38,25 @@ jobs:
                 threads: 1
             target: dev
           PROFILES
-          dbt seed --profiles-dir .
+          dbt build --profiles-dir .
           dbt docs generate --profiles-dir .
 
       - uses: actions/upload-pages-artifact@v3
         with:
           path: target/
 
-  deploy:
+      - name: Upload database as release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp dev.duckdb example_data.duckdb
+          gh release delete latest --cleanup-tag --yes 2>/dev/null || true
+          gh release create latest example_data.duckdb \
+            --title "Latest database build" \
+            --notes "Built from commit ${{ github.sha }}" \
+            --latest
+
+  deploy-pages:
     needs: build
     runs-on: ubuntu-latest
     environment:
