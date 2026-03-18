@@ -1,15 +1,29 @@
-Welcome to your new dbt project!
+# example_data
 
-### Using the starter project
+A dbt project that builds example datasets into a DuckDB database for use across [sgl-projects](https://github.com/sgl-projects) repos.
 
-Try running the following commands:
-- dbt run
-- dbt test
+## Datasets
 
+- **diamonds** — `ggplot2::diamonds` (53,940 round-cut diamonds with price, carat, cut, color, clarity, and dimensions)
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+## Using the database
+
+The latest DuckDB database is published as a GitHub Release asset and can be downloaded directly:
+
+```
+https://github.com/sgl-projects/example_data/releases/latest/download/example_data.duckdb
+```
+
+### R
+
+```r
+download.file(
+  "https://github.com/sgl-projects/example_data/releases/latest/download/example_data.duckdb",
+  "example_data.duckdb"
+)
+con <- DBI::dbConnect(duckdb::duckdb(), "example_data.duckdb")
+```
+
+## Documentation
+
+Browse the dbt docs at [sgl-projects.github.io/example_data](https://sgl-projects.github.io/example_data/).
